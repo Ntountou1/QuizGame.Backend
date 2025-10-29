@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QuizGame.Domain\QuizGame.Domain.csproj" />
+    <ProjectReference Include="..\QuizGame.Infastructure\QuizGame.Infrastructure.csproj" />
+    <ProjectReference Include="..\QuizGame.Infrastructure\QuizGame.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

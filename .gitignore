@@ -1,0 +1,25 @@
+# Build results
+bin/
+obj/
+out/
+
+# User-specific files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS-specific
+*.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
