@@ -1,10 +1,12 @@
 [
   {
     "Id": 1,
-    "Username": "Panos"
+    "Username": "Panos",
+    "Password": "TestPanos"
   },
   {
     "Id": 2,
-    "Username": "Hara"
+    "Username": "Hara",
+    "Password": "TestHara"
   }
 ]
