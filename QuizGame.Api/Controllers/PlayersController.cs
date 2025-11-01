@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using QuizGame.Application.Services;
 using Microsoft.AspNetCore.Authorization;
+using QuizGame.Domain.Entities;
 
 namespace QuizGame.Api.Controllers
 {
@@ -25,5 +26,17 @@ namespace QuizGame.Api.Controllers
             var players = _playerService.GetPlayers();
             return Ok(players);
         }
+
+        [Authorize]
+        [HttpPost("createNewPlayer")]
+        public IActionResult CreatePlayer([FromBody] Player player)
+        {
+            if (player == null || string.IsNullOrWhiteSpace(player.Username) || string.IsNullOrWhiteSpace(player.Password))
+            {
+                return BadRequest("Username and password are required");
+            } 
+            var createdPlayer = _playerService.CreatePlayer(player);
+            return CreatedAtAction(nameof(GetAll), new { id = createdPlayer.Id }, createdPlayer);
+        } 
     }
 }

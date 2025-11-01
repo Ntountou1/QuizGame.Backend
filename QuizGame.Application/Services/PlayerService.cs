@@ -43,5 +43,12 @@ namespace QuizGame.Application.Services
             _logger.LogInformation("Retrieved {Count} players", players.Count());
             return players;
         }
+
+        public Player CreatePlayer(Player player)
+        {
+            _logger.LogInformation("Creating new player {Username} ", player.Username);
+            _repository.AddPlayer(player);
+            return player;
+        }
     }
 }
