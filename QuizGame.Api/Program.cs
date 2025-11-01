@@ -1,5 +1,9 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using QuizGame.Application.Services;
 using QuizGame.Infrastructure.Repositories;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,12 +13,47 @@ builder.Logging.AddConsole();
 
 // Dependency Injection
 builder.Services.AddScoped<PlayerRepository>();
-builder.Services.AddScoped<PlayerService>();
 
+// Add TokenService for JWT
+var secretKey = builder.Configuration.GetValue<string>("Jwt:Secret")
+                ?? "this_is_a_very_long_super_secure_secret_key_123!";
+
+builder.Services.AddSingleton(new TokenService(secretKey));
+
+// Update PlayerService to inject TokenService
+builder.Services.AddScoped<PlayerService>(provider =>
+{
+    var repo = provider.GetRequiredService<PlayerRepository>();
+    var tokenService = provider.GetRequiredService<TokenService>();
+    var logger = provider.GetRequiredService<ILogger<PlayerService>>();
+    return new PlayerService(repo, logger, tokenService);
+});
+
+// Keep your existing controllers registration
 builder.Services.AddControllers();
+
+// --- New JWT authentication & authorization ---
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey)),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// --- Add authentication/authorization middleware ---
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Keep your existing endpoint mapping
 app.MapControllers();
 
 app.Run();

@@ -13,12 +13,29 @@ namespace QuizGame.Application.Services
     {
         private readonly ILogger _logger;
         private readonly PlayerRepository _repository;
+        private readonly TokenService _tokenService;
 
-        public PlayerService(PlayerRepository repository, ILogger<PlayerService> logger)
+        public PlayerService(PlayerRepository repository, ILogger<PlayerService> logger, TokenService tokenService)
         {
             _repository = repository;
             _logger = logger;
+            _tokenService = tokenService;
         }
+
+        public string? Login (LoginRequest request)
+        {
+            var player = _repository.GetAllPlayers()
+            .FirstOrDefault(p => p.Username == request.Username && p.Password == request.Password);
+
+            if (player == null) {
+                _logger.LogWarning("Login failed for username {Username}", request.Username);
+                return null;
+            }
+
+            _logger.LogInformation("Login successful for username {Username}", request.Username);
+            return _tokenService.GenerateToken(player);
+        }
+
         public IEnumerable<Player> GetPlayers()
         {
             _logger.LogInformation("Fetching all players from repository");

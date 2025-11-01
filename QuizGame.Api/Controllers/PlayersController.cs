@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using QuizGame.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace QuizGame.Api.Controllers
 {
@@ -16,6 +17,7 @@ namespace QuizGame.Api.Controllers
             _logger = logger;
         }
 
+        [Authorize]
         [HttpGet]
         public IActionResult GetAll()
         {
