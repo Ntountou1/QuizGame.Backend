@@ -15,8 +15,7 @@ builder.Logging.AddConsole();
 builder.Services.AddScoped<PlayerRepository>();
 
 // Add TokenService for JWT
-var secretKey = builder.Configuration.GetValue<string>("Jwt:Secret")
-                ?? "this_is_a_very_long_super_secure_secret_key_123!";
+var secretKey = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException("JWT Secret not configured");
 
 builder.Services.AddSingleton(new TokenService(secretKey));
 
