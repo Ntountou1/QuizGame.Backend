@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QuizGame.Application.Services
+namespace QuizGame.Application.DTOs
 {
-    public class LoginRequest
+    public class LoginResponse
     {
+        public string Token { get; set; } = null!;
         public string Username { get; set; } = null!;
-        public string Password { get; set; } = null!;
+        public int UserId { get; set; }
     }
 }

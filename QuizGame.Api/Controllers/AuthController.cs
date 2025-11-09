@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using QuizGame.Application.Services;
+using QuizGame.Application.DTOs;
 
 namespace QuizGame.Api.Controllers
 {
@@ -17,14 +18,14 @@ namespace QuizGame.Api.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            var token = _playerService.Login(request);
+            var response = _playerService.Login(request);
 
-            if (token == null)
+            if (response == null)
             {
                 return Unauthorized("Invalid username or password");
             }
 
-            return Ok(new {Token = token});
+            return Ok(response);
         }
     }
 }

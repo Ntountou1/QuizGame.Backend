@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using QuizGame.Domain.Entities;
 using QuizGame.Infrastructure.Repositories;
+using QuizGame.Application.DTOs;
 
 namespace QuizGame.Application.Services
 {
@@ -22,7 +23,7 @@ namespace QuizGame.Application.Services
             _tokenService = tokenService;
         }
 
-        public string? Login (LoginRequest request)
+        public LoginResponse? Login (LoginRequest request)
         {
             var player = _repository.GetAllPlayers()
             .FirstOrDefault(p => p.Username == request.Username && p.Password == request.Password);
@@ -33,7 +34,14 @@ namespace QuizGame.Application.Services
             }
 
             _logger.LogInformation("Login successful for username {Username}", request.Username);
-            return _tokenService.GenerateToken(player);
+
+            var token = _tokenService.GenerateToken(player);
+            return new LoginResponse
+            {
+                Token = token,
+                Username = player.Username!,
+                UserId = player.Id
+            };
         }
 
         public IEnumerable<Player> GetPlayers()
