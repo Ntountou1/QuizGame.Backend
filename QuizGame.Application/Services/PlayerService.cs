@@ -59,11 +59,22 @@ namespace QuizGame.Application.Services
             return response;
         }
 
-        public Player CreatePlayer(Player player)
+        public PlayerResponse CreatePlayer(CreatePlayerRequest request)
         {
-            _logger.LogInformation("Creating new player {Username} ", player.Username);
+            _logger.LogInformation("Creating new player {Username} ", request.Username);
+
+            var player = new Player
+            {
+                Username = request.Username,
+                Password = request.Password,
+            };
+
             _repository.AddPlayer(player);
-            return player;
+            return new PlayerResponse
+            {
+                Id = player.Id,
+                Username = player.Username
+            };
         }
     }
 }
