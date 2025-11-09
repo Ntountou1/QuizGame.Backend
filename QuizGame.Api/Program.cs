@@ -4,12 +4,17 @@ using Microsoft.IdentityModel.Tokens;
 using QuizGame.Application.Services;
 using QuizGame.Infrastructure.Repositories;
 using System.Text;
+using Serilog;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Logging
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
+//Add Serilog to Application
+builder.Host.UseSerilog();
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
 
 // Dependency Injection
 builder.Services.AddScoped<PlayerRepository>();
