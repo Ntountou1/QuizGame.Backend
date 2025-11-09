@@ -50,5 +50,27 @@ namespace QuizGame.Infrastructure.Repositories
             var updatedJson = JsonSerializer.Serialize(players, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(_filePath, updatedJson); 
         }
+
+        public void UpdatePlayer(Player updatedPlayer)
+        {
+            List<Player> players;
+            if (File.Exists(_filePath))
+            {
+                var json = File.ReadAllText(_filePath);
+                players = JsonSerializer.Deserialize<List<Player>>(json) ?? new List<Player>();
+            }
+            else
+            {
+                players = new List<Player>();
+            }
+
+            var index = players.FindIndex(p => p.Id == updatedPlayer.Id);
+            if (index != -1)
+            {
+                players[index] = updatedPlayer;
+                var updatedJson = JsonSerializer.Serialize(players, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(_filePath, updatedJson);
+            }
+        }
     }
 }

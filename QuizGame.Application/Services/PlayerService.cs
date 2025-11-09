@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using QuizGame.Domain.Entities;
 using QuizGame.Infrastructure.Repositories;
 using QuizGame.Application.DTOs;
+using System.Security.Claims;
 
 namespace QuizGame.Application.Services
 {
@@ -23,12 +24,13 @@ namespace QuizGame.Application.Services
             _tokenService = tokenService;
         }
 
-        public LoginResponse? Login (LoginRequest request)
+        public LoginResponse? Login(LoginRequest request)
         {
             var player = _repository.GetAllPlayers()
             .FirstOrDefault(p => p.Username == request.Username && p.Password == request.Password);
 
-            if (player == null) {
+            if (player == null)
+            {
                 _logger.LogWarning("Login failed for username {Username}", request.Username);
                 return null;
             }
@@ -75,6 +77,29 @@ namespace QuizGame.Application.Services
                 Id = player.Id,
                 Username = player.Username
             };
+        }
+
+        public UpdatePasswordResponse? UpdatePassword(int userId, UpdatePasswordRequest request)
+        {
+            var player = _repository.GetAllPlayers().FirstOrDefault(p => p.Id == userId);
+
+            if (player == null)
+            {
+                _logger.LogWarning("Player with id {UserId} not found", userId);
+                return null;
+            }
+
+            if (player.Password != request.OldPassword)
+            {
+                _logger.LogWarning("Incorrect old password for user {Username}", player.Username);
+                return null;
+            }
+
+            player.Password = request.NewPassword;
+            _repository.UpdatePlayer(player);
+            _logger.LogInformation("Password updated for user {Username}", player.Username);
+
+            return new UpdatePasswordResponse();
         }
     }
 }

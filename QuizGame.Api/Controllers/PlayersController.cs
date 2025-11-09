@@ -8,7 +8,7 @@ namespace QuizGame.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PlayersController: ControllerBase
+    public class PlayersController : ControllerBase
     {
         private readonly PlayerService _playerService;
         private readonly ILogger<PlayersController> _logger;
@@ -35,9 +35,32 @@ namespace QuizGame.Api.Controllers
             if (request == null || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
             {
                 return BadRequest("Username and password are required");
-            } 
+            }
             var createdPlayer = _playerService.CreatePlayer(request);
             return CreatedAtAction(nameof(GetAll), new { id = createdPlayer.Id }, createdPlayer);
-        } 
+        }
+
+        [Authorize]
+        [HttpPut("updatePassword")]
+        public IActionResult UpdatePassword([FromBody] UpdatePasswordRequest request)
+        {
+            // Get logged-in user id from JWT
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            int userId = int.Parse(userIdClaim.Value);
+
+            var response = _playerService.UpdatePassword(userId, request);
+
+            if (response == null)
+            {
+                return BadRequest("Old password is incorrect or user not found");
+            }
+
+            return Ok(response);
+        }
     }
 }
