@@ -44,12 +44,19 @@ namespace QuizGame.Application.Services
             };
         }
 
-        public IEnumerable<Player> GetPlayers()
+        public IEnumerable<PlayerResponse> GetPlayers()
         {
             _logger.LogInformation("Fetching all players from repository");
             var players = _repository.GetAllPlayers();
-            _logger.LogInformation("Retrieved {Count} players", players.Count());
-            return players;
+
+            var response = players.Select(p => new PlayerResponse
+            {
+                Id = p.Id,
+                Username = p.Username!
+            });
+
+            _logger.LogInformation("Retrieved {Count} players", response.Count());
+            return response;
         }
 
         public Player CreatePlayer(Player player)
