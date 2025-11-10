@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\QuizGame.Domain\QuizGame.Domain.csproj" />
-    <ProjectReference Include="..\QuizGame.Infastructure\QuizGame.Infrastructure.csproj" />
     <ProjectReference Include="..\QuizGame.Infrastructure\QuizGame.Infrastructure.csproj" />
   </ItemGroup>
 
