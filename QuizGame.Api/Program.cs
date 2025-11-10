@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using QuizGame.Application.Interfaces;
 using QuizGame.Application.Services;
+using QuizGame.Domain.Interfaces;
 using QuizGame.Infrastructure.Repositories;
-using System.Text;
 using Serilog;
+using System.Text;
 
 
 
@@ -18,6 +20,8 @@ Log.Logger = new LoggerConfiguration()
 
 // Dependency Injection
 builder.Services.AddScoped<PlayerRepository>();
+builder.Services.AddSingleton<IPlayerRepository, PlayerRepository>();
+builder.Services.AddSingleton<IPlayerService, PlayerService>();
 
 // Add TokenService for JWT
 var secretKey = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException("JWT Secret not configured");

@@ -8,16 +8,18 @@ using QuizGame.Domain.Entities;
 using QuizGame.Infrastructure.Repositories;
 using QuizGame.Application.DTOs;
 using System.Security.Claims;
+using QuizGame.Application.Interfaces;
+using QuizGame.Domain.Interfaces;
 
 namespace QuizGame.Application.Services
 {
-    public class PlayerService
+    public class PlayerService : IPlayerService
     {
         private readonly ILogger _logger;
-        private readonly PlayerRepository _repository;
+        private readonly IPlayerRepository _repository;
         private readonly TokenService _tokenService;
 
-        public PlayerService(PlayerRepository repository, ILogger<PlayerService> logger, TokenService tokenService)
+        public PlayerService(IPlayerRepository repository, ILogger<PlayerService> logger, TokenService tokenService)
         {
             _repository = repository;
             _logger = logger;
