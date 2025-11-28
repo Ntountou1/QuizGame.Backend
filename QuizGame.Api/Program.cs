@@ -23,6 +23,11 @@ builder.Services.AddScoped<PlayerRepository>();
 builder.Services.AddSingleton<IPlayerRepository, PlayerRepository>();
 builder.Services.AddSingleton<IPlayerService, PlayerService>();
 
+// Questions DI
+builder.Services.AddScoped<QuestionRepository>();
+builder.Services.AddSingleton<IQuestionRepository, QuestionRepository>();
+builder.Services.AddSingleton<IQuestionService, QuestionService>();
+
 // Add TokenService for JWT
 var secretKey = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException("JWT Secret not configured");
 

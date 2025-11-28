@@ -3,6 +3,7 @@ using QuizGame.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using QuizGame.Domain.Entities;
 using QuizGame.Application.DTOs;
+using QuizGame.Application.Interfaces;
 
 namespace QuizGame.Api.Controllers
 {
@@ -10,10 +11,10 @@ namespace QuizGame.Api.Controllers
     [Route("api/[controller]")]
     public class PlayersController : ControllerBase
     {
-        private readonly PlayerService _playerService;
+        private readonly IPlayerService _playerService;
         private readonly ILogger<PlayersController> _logger;
 
-        public PlayersController(PlayerService playerService, ILogger<PlayersController> logger)
+        public PlayersController(IPlayerService playerService, ILogger<PlayersController> logger)
         {
             _playerService = playerService;
             _logger = logger;
