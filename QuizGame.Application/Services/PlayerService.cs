@@ -26,6 +26,7 @@ namespace QuizGame.Application.Services
             _tokenService = tokenService;
         }
 
+        //Logs in player
         public LoginResponse? Login(LoginRequest request)
         {
             var player = _repository.GetAllPlayers()
@@ -39,6 +40,9 @@ namespace QuizGame.Application.Services
 
             _logger.LogInformation("Login successful for username {Username}", request.Username);
 
+            // update last login prop of player when he logs in succesfully
+            UpdateLastLogin(player.Id);
+
             var token = _tokenService.GenerateToken(player);
             return new LoginResponse
             {
@@ -48,6 +52,7 @@ namespace QuizGame.Application.Services
             };
         }
 
+        //Return list of all players
         public IEnumerable<PlayerResponse> GetPlayers()
         {
             _logger.LogInformation("Fetching all players from repository");
@@ -70,6 +75,7 @@ namespace QuizGame.Application.Services
             return response;
         }
 
+        //Create new player
         public PlayerResponse CreatePlayer(CreatePlayerRequest request)
         {
             _logger.LogInformation("Creating new player {Username} ", request.Username);
@@ -78,7 +84,7 @@ namespace QuizGame.Application.Services
             {
                 Username = request.Username,
                 Password = request.Password,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
                 LastLogInAt = null,
                 TotalScore = 0,
                 GamesPlayed = 0,
@@ -102,6 +108,7 @@ namespace QuizGame.Application.Services
             };
         }
 
+        //Updates password of logged in user given the old password and the new password on the body
         public UpdatePasswordResponse? UpdatePassword(int userId, UpdatePasswordRequest request)
         {
             var player = _repository.GetAllPlayers().FirstOrDefault(p => p.Id == userId);
@@ -123,6 +130,24 @@ namespace QuizGame.Application.Services
             _logger.LogInformation("Password updated for user {Username}", player.Username);
 
             return new UpdatePasswordResponse();
+        }
+
+
+        //Automatically update LastLogInAt prop on json when user successfully logs in
+        public void UpdateLastLogin (int playerId)
+        {
+            var player = _repository.GetAllPlayers().FirstOrDefault(p => p.Id == playerId);
+            if (player == null)
+            {
+                var message = $"Player with ID {playerId} not found.";
+                _logger.LogError(message);
+                throw new KeyNotFoundException(message);
+            }
+
+            player.LastLogInAt = DateTime.UtcNow;
+            //Update JSON
+            _repository.UpdatePlayer(player);
+            _logger.LogInformation("Updated LastLogInAt for player {Username}", player.Username);
         }
     }
 }
