@@ -10,5 +10,12 @@ namespace QuizGame.Application.DTOs
     {
         public int Id { get; set; }
         public string Username { get; set; } = null!;
+        public DateTime CreatedAt { get; set; }
+        public DateTime? LastLogInAt { get; set; }
+        public int TotalScore { get; set; }
+        public int GamesPlayed { get; set; }
+        public int GamesWon { get; set; }
+        public int CurrentRank { get; set; }
+        public int Level { get; set; }
     }
 }

@@ -56,7 +56,14 @@ namespace QuizGame.Application.Services
             var response = players.Select(p => new PlayerResponse
             {
                 Id = p.Id,
-                Username = p.Username!
+                Username = p.Username!,
+                CreatedAt = p.CreatedAt,
+                LastLogInAt = p.LastLogInAt,
+                TotalScore = p.TotalScore,
+                GamesPlayed = p.GamesPlayed,
+                GamesWon = p.GamesWon,
+                CurrentRank = p.CurrentRank,
+                Level = p.Level
             });
 
             _logger.LogInformation("Retrieved {Count} players", response.Count());
@@ -71,13 +78,27 @@ namespace QuizGame.Application.Services
             {
                 Username = request.Username,
                 Password = request.Password,
+                CreatedAt = DateTime.Now,
+                LastLogInAt = null,
+                TotalScore = 0,
+                GamesPlayed = 0,
+                GamesWon = 0,
+                CurrentRank = 0,
+                Level = 1
             };
 
             _repository.AddPlayer(player);
             return new PlayerResponse
             {
                 Id = player.Id,
-                Username = player.Username
+                Username = player.Username,
+                CreatedAt = player.CreatedAt,
+                LastLogInAt= player.LastLogInAt,
+                TotalScore = player.TotalScore,
+                GamesPlayed = player.GamesPlayed,
+                GamesWon= player.GamesWon,
+                CurrentRank = player.CurrentRank,
+                Level = player.Level
             };
         }
 
