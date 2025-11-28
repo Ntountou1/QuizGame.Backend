@@ -12,5 +12,7 @@ namespace QuizGame.Domain.Interfaces
         IEnumerable<Player> GetAllPlayers();
         void AddPlayer(Player newPlayer);
         void UpdatePlayer(Player updatedPlayer);
+        void DeletePlayer(int playerId);
+        Player? GetPlayerById(int id);
     }
 }

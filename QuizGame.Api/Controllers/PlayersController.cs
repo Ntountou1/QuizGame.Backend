@@ -63,5 +63,21 @@ namespace QuizGame.Api.Controllers
 
             return Ok(response);
         }
+
+        [Authorize]
+        [HttpDelete("deletePlayer")]
+        public IActionResult DeletePlayer()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            int playerId = int.Parse(userIdClaim.Value);
+
+            _playerService.DeletePlayer(playerId);
+            return Ok(new { message = "User deleted successfully." });
+        }
     }
 }

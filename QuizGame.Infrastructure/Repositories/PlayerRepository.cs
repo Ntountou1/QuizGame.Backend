@@ -73,5 +73,46 @@ namespace QuizGame.Infrastructure.Repositories
                 File.WriteAllText(_filePath, updatedJson);
             }
         }
+
+        public void DeletePlayer(int id)
+        {
+            List<Player> players;
+
+            if (File.Exists(_filePath))
+            {
+                var json = File.ReadAllText(_filePath);
+                players = JsonSerializer.Deserialize<List<Player>>(json) ?? new List<Player>();
+            }
+            else
+            {
+                players = new List<Player>();
+            }
+
+            // Remove
+            var existing = players.FirstOrDefault(p => p.Id == id);
+            if (existing != null)
+            {
+                players.Remove(existing);
+
+                var updatedJson = JsonSerializer.Serialize(players, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+
+                File.WriteAllText(_filePath, updatedJson);
+            }
+        }
+
+        public Player? GetPlayerById(int id)
+        {
+            if (!File.Exists(_filePath))
+                return null;
+
+            var json = File.ReadAllText(_filePath);
+            var players = JsonSerializer.Deserialize<List<Player>>(json) ?? new List<Player>();
+
+            return players.FirstOrDefault(p => p.Id == id);
+        }
+
     }
 }

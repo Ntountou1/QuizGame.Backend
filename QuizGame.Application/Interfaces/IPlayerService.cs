@@ -14,5 +14,6 @@ namespace QuizGame.Application.Interfaces
         LoginResponse? Login(LoginRequest request);
         UpdatePasswordResponse? UpdatePassword(int userId, UpdatePasswordRequest request);
         void UpdateLastLogin(int playerId);
+        void DeletePlayer(int playerId);
     }
 }

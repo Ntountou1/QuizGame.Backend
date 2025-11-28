@@ -149,5 +149,20 @@ namespace QuizGame.Application.Services
             _repository.UpdatePlayer(player);
             _logger.LogInformation("Updated LastLogInAt for player {Username}", player.Username);
         }
+
+        public void DeletePlayer (int playerId)
+        {
+            _logger.LogInformation("Attempting to delete player {PlayerId}", playerId);
+            var player = _repository.GetPlayerById(playerId);
+            if (player == null)
+            {
+                _logger.LogWarning("Player {PlayerId} not found", playerId);
+                throw new Exception("Player not found");
+            }
+
+            _repository.DeletePlayer(playerId);
+
+            _logger.LogInformation("Player {PlayerId} deleted successfully", playerId);
+        }
     }
 }
