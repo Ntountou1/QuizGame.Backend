@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using QuizGame.Domain.Enums;
 
 namespace QuizGame.Domain.Entities
 {
@@ -14,7 +15,7 @@ namespace QuizGame.Domain.Entities
             public DateTime StartTime { get; set; }
             public DateTime? EndTime { get; set; }
             public int Score { get; set; } = 0;
-            public string Status { get; set; } = "InProgress"; // InProgress, Completed, Abandoned
+            public GameSessionStatus Status { get; set; } = GameSessionStatus.InProgress;
             public int TotalQuestions { get; set; } = 5;
             public int TimeLimitSeconds { get; set; } = 10;
 
