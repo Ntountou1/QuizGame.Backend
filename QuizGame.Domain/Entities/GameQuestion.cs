@@ -13,6 +13,7 @@ namespace QuizGame.Domain.Entities
 
         public int Points { get; set; }
         public bool IsCorrect { get; set; }
+        public DateTime QuestionStartTime { get; set; } = DateTime.UtcNow;
         public TimeSpan? TimeTaken { get; set; }
     }
 }

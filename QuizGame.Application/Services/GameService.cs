@@ -64,7 +64,10 @@ namespace QuizGame.Application.Services
                 Status = GameSessionStatus.InProgress,
                 TotalQuestions = 5,
                 TimeLimitSeconds = 10,
-                QuestionIds = selectedQuestions.Select(q => new GameQuestion { QuestionId = q.Id }).ToList()
+                QuestionIds = selectedQuestions.Select(q => new GameQuestion { 
+                    QuestionId = q.Id,
+                    QuestionStartTime = DateTime.UtcNow
+                }).ToList()
             };
 
             _sessions.Add(newSession);
@@ -126,6 +129,10 @@ namespace QuizGame.Application.Services
             if (question == null)
                 throw new KeyNotFoundException("Question not found in this session");
 
+            // Allow only one answer per question
+            if (question.TimeTaken.HasValue)
+                throw new InvalidOperationException("This question has already been answered");
+
             //Take the actual question data to see the correct answer of the question
             var questionData = _questionRepository.GetAllQuestions()
                     .First(q => q.Id == question.QuestionId);
@@ -134,10 +141,18 @@ namespace QuizGame.Application.Services
             int points = isCorrect ? questionData.Points : 0;
 
             session.Score += points;
-            question.TimeTaken = request.TimeTaken;
+            question.TimeTaken = DateTime.UtcNow - question.QuestionStartTime;
 
-            // Check if all questions answered
-            bool isCompleted = session.QuestionIds.All(q => q.TimeTaken > TimeSpan.Zero);
+            _logger.LogInformation(
+                    "Session {SessionId} question times: {Times}",
+                    session.Id,
+                    string.Join(", ", session.QuestionIds.Select(q => $"{q.QuestionId}:{q.TimeTaken?.TotalSeconds ?? 0}"))
+                );
+
+            // Check if all questions in this game session have been answered.
+            // A question is considered answered if its TimeTaken property has a value greater than zero.
+            // If every question meets this condition, the game session is complete.
+            bool isCompleted = session.QuestionIds.All(q => q.TimeTaken.HasValue && q.TimeTaken.Value > TimeSpan.Zero);
             if (isCompleted)
             {
                 session.Status = GameSessionStatus.Completed;
