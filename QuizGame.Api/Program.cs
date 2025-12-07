@@ -28,6 +28,10 @@ builder.Services.AddScoped<QuestionRepository>();
 builder.Services.AddSingleton<IQuestionRepository, QuestionRepository>();
 builder.Services.AddSingleton<IQuestionService, QuestionService>();
 
+//Game DI
+builder.Services.AddSingleton<IQuestionRepository, QuestionRepository>();
+builder.Services.AddSingleton<IGameService, GameService>();
+
 // Add TokenService for JWT
 var secretKey = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException("JWT Secret not configured");
 
