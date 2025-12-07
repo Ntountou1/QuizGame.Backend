@@ -19,7 +19,7 @@ namespace QuizGame.Domain.Entities
             public int TotalQuestions { get; set; } = 5;
             public int TimeLimitSeconds { get; set; } = 10;
 
-            public List<int> QuestionIds { get; set; } = new List<int>();
+            public List<GameQuestion> QuestionIds { get; set; } = new List<GameQuestion>();
             public TimeSpan? TotalTimeTaken { get; set; }
      }
 }

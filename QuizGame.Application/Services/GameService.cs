@@ -1,12 +1,15 @@
 ﻿using Microsoft.Extensions.Logging;
 using QuizGame.Application.DTOs;
 using QuizGame.Application.Interfaces;
+using QuizGame.Domain.Entities;
+using QuizGame.Domain.Enums;
 using QuizGame.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GameSession = QuizGame.Domain.Entities.GameSession;
 
 namespace QuizGame.Application.Services
 {
@@ -58,10 +61,10 @@ namespace QuizGame.Application.Services
                 PlayerId = playerId,
                 StartTime = DateTime.UtcNow,
                 Score = 0,
-                Status = "InProgress",
+                Status = GameSessionStatus.InProgress,
                 TotalQuestions = 5,
                 TimeLimitSeconds = 10,
-                QuestionIds = selectedQuestions.Select(q => q.Id)
+                QuestionIds = selectedQuestions.Select(q => new GameQuestion { QuestionId = q.Id }).ToList()
             };
 
             _sessions.Add(newSession);
