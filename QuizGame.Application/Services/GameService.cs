@@ -126,8 +126,12 @@ namespace QuizGame.Application.Services
             if (question == null)
                 throw new KeyNotFoundException("Question not found in this session");
 
-            bool isCorrect = question.QuestionId == request.AnswerId; // you'll need to compare with correct answer from Question model
-            int points = isCorrect ? question.Points : 0;
+            //Take the actual question data to see the correct answer of the question
+            var questionData = _questionRepository.GetAllQuestions()
+                    .First(q => q.Id == question.QuestionId);
+
+            bool isCorrect = request.AnswerId == questionData.CorrectAnswerId;
+            int points = isCorrect ? questionData.Points : 0;
 
             session.Score += points;
             question.TimeTaken = request.TimeTaken;
