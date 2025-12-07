@@ -78,12 +78,12 @@ namespace QuizGame.Application.Services
                 StartTime = newSession.StartTime,
                 TotalQuestions = newSession.TotalQuestions,
                 TimeLimitSeconds = newSession.TimeLimitSeconds,
-                QuestionIds = newSession.QuestionIds
+                QuestionIds = newSession.QuestionIds.Select(q => q.QuestionId)
             };
 
         }
 
-        public GameSession GetGameSession(int gameSessionId)
+        public QuizGame.Application.DTOs.GameSession GetGameSession(int gameSessionId)
         {
             _logger.LogInformation("Fetching game session {SessionId}", gameSessionId);
             var session = _sessions.FirstOrDefault(s => s.Id == gameSessionId);
@@ -93,7 +93,21 @@ namespace QuizGame.Application.Services
                 throw new KeyNotFoundException($"Game session {gameSessionId} not found");
             }
 
-            return session;
+            // Map domain model to DTO
+            var dto = new QuizGame.Application.DTOs.GameSession
+            {
+                Id = session.Id,
+                PlayerId = session.PlayerId,
+                StartTime = session.StartTime,
+                EndTime = session.EndTime,
+                Score = session.Score,
+                Status = session.Status.ToString(),
+                TotalQuestions = session.TotalQuestions,
+                TimeLimitSeconds = session.TimeLimitSeconds,
+                QuestionIds = session.QuestionIds.Select(q => q.QuestionId)
+            };
+
+            return dto;
         }
     }
 }
