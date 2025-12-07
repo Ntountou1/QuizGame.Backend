@@ -49,5 +49,13 @@ namespace QuizGame.Api.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
+
+        [Authorize]
+        [HttpPost("submitAnswer")]
+        public IActionResult SubmitAnswer([FromBody] SubmitAnswerRequest request)
+        {
+            var response = _gameService.SubmitAnswer(request);
+            return Ok(response);
+        }
     }
 }

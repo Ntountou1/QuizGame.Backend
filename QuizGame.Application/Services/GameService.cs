@@ -109,5 +109,44 @@ namespace QuizGame.Application.Services
 
             return dto;
         }
+
+        public SubmitAnswerResponse SubmitAnswer (SubmitAnswerRequest request)
+        {
+            //Only continue if session exists
+            var session = _sessions.FirstOrDefault(s => s.Id == request.GameSessionId);
+            if (session == null)
+                throw new KeyNotFoundException("Game session not found");
+
+            //Only continue if session is on status InProgress
+            if (session.Status != GameSessionStatus.InProgress)
+                throw new InvalidOperationException("Game session is not active");
+
+            //Only continue if question of specific session exists
+            var question = session.QuestionIds.FirstOrDefault(q => q.QuestionId == request.QuestionId);
+            if (question == null)
+                throw new KeyNotFoundException("Question not found in this session");
+
+            bool isCorrect = question.QuestionId == request.AnswerId; // you'll need to compare with correct answer from Question model
+            int points = isCorrect ? question.Points : 0;
+
+            session.Score += points;
+            question.TimeTaken = request.TimeTaken;
+
+            // Check if all questions answered
+            bool isCompleted = session.QuestionIds.All(q => q.TimeTaken > TimeSpan.Zero);
+            if (isCompleted)
+            {
+                session.Status = GameSessionStatus.Completed;
+                session.EndTime = DateTime.UtcNow;
+            }
+
+            return new SubmitAnswerResponse
+            {
+                IsCorrect = isCorrect,
+                PointsEarned = points,
+                TotalScore = session.Score,
+                IsGameCompleted = isCompleted
+            };
+        }
     }
 }

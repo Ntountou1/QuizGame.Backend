@@ -10,6 +10,8 @@ namespace QuizGame.Domain.Entities
     {
         public int QuestionId { get; set; }
         public int? SelectedAnswerId { get; set; }
+
+        public int Points { get; set; }
         public bool IsCorrect { get; set; }
         public TimeSpan? TimeTaken { get; set; }
     }

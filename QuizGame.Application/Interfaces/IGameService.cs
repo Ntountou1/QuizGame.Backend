@@ -11,5 +11,6 @@ namespace QuizGame.Application.Interfaces
     {
         StartGameResponse StartNewGame(int playerId);
         GameSession GetGameSession(int gameSessionId);
+        SubmitAnswerResponse SubmitAnswer(SubmitAnswerRequest request);
     }
 }
