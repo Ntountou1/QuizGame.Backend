@@ -22,17 +22,28 @@ namespace QuizGame.Api.Controllers
         [HttpPost("start")]
         public IActionResult StartGame()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
+            try
             {
-                return Unauthorized();
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                {
+                    return Unauthorized(new { message = "User is not authenticated" });
+                }
+
+                int playerId = int.Parse(userIdClaim.Value);
+
+                var response = _gameService.StartNewGame(playerId);
+                return Ok(response);
             }
-
-            int playerId = int.Parse(userIdClaim.Value);
-
-            var response = _gameService.StartNewGame(playerId);
-
-            return Ok(response);
+            catch (InvalidOperationException ex)
+            {
+                // For example, if there are not enough questions to start
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred." });
+            }
         }
 
         [Authorize]
@@ -48,14 +59,35 @@ namespace QuizGame.Api.Controllers
             {
                 return NotFound(new { message = ex.Message });
             }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred." });
+            }
         }
+
 
         [Authorize]
         [HttpPost("submitAnswer")]
         public IActionResult SubmitAnswer([FromBody] SubmitAnswerRequest request)
         {
-            var response = _gameService.SubmitAnswer(request);
-            return Ok(response);
+            try
+            {
+                var response = _gameService.SubmitAnswer(request);
+                return Ok(response);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred." });
+            }
         }
+
     }
 }

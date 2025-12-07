@@ -21,12 +21,20 @@ namespace QuizGame.Api.Controllers
         }
 
         [Authorize]
-        [HttpGet()]
+        [HttpGet]
         public IActionResult GetAllQuestions()
         {
-            _logger.LogInformation("GET /api/questions/getAllQuestions called");
-            var questions = _questionService.GetAllQuestions();
-            return Ok(questions);
+            try
+            {
+                _logger.LogInformation("GET /api/questions called");
+                var questions = _questionService.GetAllQuestions();
+                return Ok(questions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching questions");
+                return StatusCode(500, new { message = "An unexpected error occurred." });
+            }
         }
     }
 }

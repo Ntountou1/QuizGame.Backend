@@ -18,14 +18,26 @@ namespace QuizGame.Api.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            var response = _playerService.Login(request);
-
-            if (response == null)
+            try
             {
-                return Unauthorized("Invalid username or password");
-            }
+                if (request == null || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+                {
+                    return BadRequest(new { message = "Username and password are required" });
+                }
 
-            return Ok(response);
+                var response = _playerService.Login(request);
+
+                if (response == null)
+                {
+                    return Unauthorized(new { message = "Invalid username or password" });
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred." });
+            }
         }
     }
 }
