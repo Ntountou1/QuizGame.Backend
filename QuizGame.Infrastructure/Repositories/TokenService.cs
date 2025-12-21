@@ -15,6 +15,19 @@ namespace QuizGame.Infrastructure.Repositories
             _secretKey = secretKey;
         }
 
+        /// <summary>
+        /// Generates a JSON Web Token (JWT) for the specified player.
+        /// </summary>
+        /// <param name="player">The <see cref="Player"/> object for whom the token is generated.</param>
+        /// <returns>
+        /// A <see cref="string"/> representing the signed JWT.
+        /// </returns>
+        /// <remarks>
+        /// - The token includes the player's ID and username as claims.
+        /// - The token is signed using HMAC SHA-256 with a symmetric key.
+        /// - The token expires 1 day after creation.
+        /// - Intended for authentication and authorization purposes.
+        /// </remarks>
         public string GenerateToken(Player player) {
             var tokenHandler = new JwtSecurityTokenHandler(); 
             var key = Encoding.ASCII.GetBytes(_secretKey);

@@ -19,6 +19,17 @@ namespace QuizGame.Infrastructure.Repositories
             _filePath = @"C:\Users\Panagiotis\Desktop\QuizGame\questions.json";
         }
 
+        /// <summary>
+        /// Retrieves all quiz questions from the storage file.
+        /// </summary>
+        /// <returns>
+        /// An enumerable collection of <see cref="Question"/> objects.
+        /// Returns an empty collection if the storage file does not exist or contains no questions.
+        /// </returns>
+        /// <remarks>
+        /// - Reads the JSON file located at <c>_filePath</c> and deserializes it into <see cref="Question"/> objects.
+        /// - This is a read-only operation and does not modify the underlying data.
+        /// </remarks>
         public IEnumerable<Question> GetAllQuestions()
         {
             if (!File.Exists(_filePath))

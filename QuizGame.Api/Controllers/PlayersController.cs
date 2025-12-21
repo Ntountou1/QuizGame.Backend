@@ -20,6 +20,17 @@ namespace QuizGame.Api.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Retrieves a list of all registered players.
+        /// </summary>
+        /// <returns>
+        /// - <c>200 OK</c> with a collection of <see cref="PlayerResponse"/> objects.
+        /// - <c>500 Internal Server Error</c> if an unexpected error occurs.
+        /// </returns>
+        /// <remarks>
+        /// - Requires the user to be authenticated via [Authorize].
+        /// - Calls <see cref="_playerService.GetPlayers"/> to fetch player data.
+        /// </remarks>
         [Authorize]
         [HttpGet]
         public IActionResult GetAll()
@@ -37,6 +48,20 @@ namespace QuizGame.Api.Controllers
             }
         }
 
+        // <summary>
+        /// Creates a new player account.
+        /// </summary>
+        /// <param name="request">The <see cref="CreatePlayerRequest"/> containing the username and password.</param>
+        /// <returns>
+        /// - <c>201 Created</c> with the created <see cref="PlayerResponse"/> if successful.
+        /// - <c>400 Bad Request</c> if the request is null or missing required fields.
+        /// - <c>500 Internal Server Error</c> if an unexpected error occurs.
+        /// </returns>
+        /// <remarks>
+        /// - Calls <see cref="_playerService.CreatePlayer"/> to add the new player.
+        /// - Returns a location header referencing <see cref="GetAll"/> for convenience.
+        /// - Requires the user to be authenticated via [Authorize].
+        /// </remarks>
         [Authorize]
         [HttpPost("createNewPlayer")]
         public IActionResult CreatePlayer([FromBody] CreatePlayerRequest request)
@@ -58,6 +83,21 @@ namespace QuizGame.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Updates the password of the currently authenticated player.
+        /// </summary>
+        /// <param name="request">The <see cref="UpdatePasswordRequest"/> containing the old and new passwords.</param>
+        /// <returns>
+        /// - <c>200 OK</c> if the password is successfully updated.
+        /// - <c>400 Bad Request</c> if the old password is incorrect or user not found.
+        /// - <c>401 Unauthorized</c> if the user is not authenticated.
+        /// - <c>500 Internal Server Error</c> if an unexpected error occurs.
+        /// </returns>
+        /// <remarks>
+        /// - Extracts the player's ID from the authentication claims.
+        /// - Calls <see cref="_playerService.UpdatePassword"/> to perform the update.
+        /// - Requires the user to be authenticated via [Authorize].
+        /// </remarks>
         [Authorize]
         [HttpPut("updatePassword")]
         public IActionResult UpdatePassword([FromBody] UpdatePasswordRequest request)
@@ -84,6 +124,20 @@ namespace QuizGame.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes the currently authenticated player from the system.
+        /// </summary>
+        /// <returns>
+        /// - <c>200 OK</c> if the player is successfully deleted.
+        /// - <c>401 Unauthorized</c> if the user is not authenticated.
+        /// - <c>404 Not Found</c> if the player does not exist.
+        /// - <c>500 Internal Server Error</c> if an unexpected error occurs.
+        /// </returns>
+        /// <remarks>
+        /// - Extracts the player's ID from the authentication claims.
+        /// - Calls <see cref="_playerService.DeletePlayer"/> to remove the player.
+        /// - Requires the user to be authenticated via [Authorize].
+        /// </remarks>
         [Authorize]
         [HttpDelete("deletePlayer")]
         public IActionResult DeletePlayer()

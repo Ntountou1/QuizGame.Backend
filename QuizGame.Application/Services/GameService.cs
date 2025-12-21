@@ -29,6 +29,21 @@ namespace QuizGame.Application.Services
             _playerRepository = playerRepository;
         }
 
+        /// <summary>
+        /// Starts a new quiz game session for the specified player.
+        /// </summary>
+        /// <param name="playerId">The unique identifier of the player starting the game.</param>
+        /// <returns>
+        /// A <see cref="StartGameResponse"/> containing session metadata and the selected question IDs.
+        /// </returns>
+        /// <remarks>
+        /// - Randomly selects a fixed set of questions based on difficulty.
+        /// - Initializes a new game session with status <c>InProgress</c>.
+        /// - Throws an exception if there are insufficient questions available.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when no questions or not enough questions of the required difficulty exist.
+        /// </exception>
         public StartGameResponse StartNewGame (int playerId)
         {
             _logger.LogInformation("Starting new game for player {PlayerId}", playerId);
@@ -88,6 +103,22 @@ namespace QuizGame.Application.Services
 
         }
 
+        /// <summary>
+        /// Retrieves a game session by its identifier and returns it as a read-only DTO.
+        /// </summary>
+        /// <param name="gameSessionId">The unique identifier of the game session.</param>
+        /// <returns>
+        /// A <see cref="QuizGame.Application.DTOs.GameSession"/> representing the current state
+        /// of the requested game session.
+        /// </returns>
+        /// <remarks>
+        /// - This method is intended for query/read-only scenarios.
+        /// - The returned object is a DTO and does not allow mutation of session state.
+        /// - Domain-specific properties are mapped to a transport-friendly format.
+        /// </remarks>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the requested game session does not exist.
+        /// </exception>
         public QuizGame.Application.DTOs.GameSession GetGameSession(int gameSessionId)
         {
             _logger.LogInformation("Fetching game session {SessionId}", gameSessionId);
@@ -115,6 +146,28 @@ namespace QuizGame.Application.Services
             return dto;
         }
 
+        /// <summary>
+        /// Submits an answer for a specific question within an active game session.
+        /// </summary>
+        /// <param name="request">
+        /// The request containing the game session ID, question ID, and selected answer ID.
+        /// </param>
+        /// <returns>
+        /// A <see cref="SubmitAnswerResponse"/> indicating correctness, points earned,
+        /// total session score, and whether the game has completed.
+        /// </returns>
+        /// <remarks>
+        /// - Validates session and question state.
+        /// - Evaluates the submitted answer and updates session score.
+        /// - Tracks time taken per question.
+        /// - Completes the session and updates player statistics when all questions are answered.
+        /// </remarks>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the game session, question, or player cannot be found.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the session is not active or the question has already been answered.
+        /// </exception>
         public SubmitAnswerResponse SubmitAnswer(SubmitAnswerRequest request)
         {
             var session = GetActiveSession(request.GameSessionId);
@@ -142,7 +195,23 @@ namespace QuizGame.Application.Services
             };
         }
 
-
+        /// <summary>
+        /// Retrieves an active game session by ID.
+        /// </summary>
+        /// <param name="sessionId">The unique identifier of the game session.</param>
+        /// <returns>
+        /// The active <see cref="GameSession"/> domain entity.
+        /// </returns>
+        /// <remarks>
+        /// This method enforces that the session exists and is currently in progress.
+        /// It is intended for command-side operations that mutate session state.
+        /// </remarks>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the session does not exist.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the session is not in the <c>InProgress</c> state.
+        /// </exception>
         private GameSession GetActiveSession(int sessionId)
         {
             var session = _sessions.FirstOrDefault(s => s.Id == sessionId);
@@ -155,6 +224,23 @@ namespace QuizGame.Application.Services
             return session;
         }
 
+        /// <summary>
+        /// Retrieves an unanswered question belonging to a specific game session.
+        /// </summary>
+        /// <param name="session">The game session containing the question.</param>
+        /// <param name="questionId">The unique identifier of the question.</param>
+        /// <returns>
+        /// The <see cref="GameQuestion"/> associated with the session.
+        /// </returns>
+        /// <remarks>
+        /// Ensures that the question exists within the session and has not already been answered.
+        /// </remarks>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the question does not belong to the session.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the question has already been answered.
+        /// </exception>
         private GameQuestion GetUnansweredQuestion(GameSession session, int questionId)
         {
             var question = session.QuestionIds.FirstOrDefault(q => q.QuestionId == questionId);
@@ -167,6 +253,17 @@ namespace QuizGame.Application.Services
             return question;
         }
 
+        /// <summary>
+        /// Evaluates whether a submitted answer is correct and calculates the awarded points.
+        /// </summary>
+        /// <param name="questionId">The unique identifier of the question.</param>
+        /// <param name="answerId">The identifier of the submitted answer.</param>
+        /// <returns>
+        /// A tuple containing a boolean indicating correctness and the points awarded.
+        /// </returns>
+        /// <remarks>
+        /// Retrieves the authoritative question data from the repository to validate the answer.
+        /// </remarks>
         private (bool isCorrect, int points) EvaluateAnswer(int questionId, int answerId)
         {
             var questionData = _questionRepository
@@ -179,18 +276,49 @@ namespace QuizGame.Application.Services
             return (isCorrect, points);
         }
 
+        /// <summary>
+        /// Determines whether all questions in a game session have been answered.
+        /// </summary>
+        /// <param name="session">The game session to evaluate.</param>
+        /// <returns>
+        /// <c>true</c> if all questions have a recorded answer time; otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// A question is considered answered when its <c>TimeTaken</c> value is set.
+        /// </remarks>
         private bool IsSessionCompleted(GameSession session)
         {
             return session.QuestionIds.All(q =>
                 q.TimeTaken.HasValue && q.TimeTaken.Value > TimeSpan.Zero);
         }
 
+        /// <summary>
+        /// Marks a game session as completed and sets its end time.
+        /// </summary>
+        /// <param name="session">The game session to complete.</param>
+        /// <remarks>
+        /// This method performs only session state finalization.
+        /// Player-related updates are handled elsewhere.
+        /// </remarks>
         private void CompleteSession(GameSession session)
         {
             session.Status = GameSessionStatus.Completed;
             session.EndTime = DateTime.UtcNow;
         }
 
+        /// <summary>
+        /// Updates aggregate player statistics after a completed game session.
+        /// </summary>
+        /// <param name="playerId">The unique identifier of the player.</param>
+        /// <param name="score">The score achieved in the completed session.</param>
+        /// <remarks>
+        /// - Increments total score by the session score.
+        /// - Increments the number of games played.
+        /// - Persists the updated player state.
+        /// </remarks>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the player cannot be found.
+        /// </exception>
         private void UpdatePlayerStats(int playerId, int score)
         {
             var player = _playerRepository.GetPlayerById(playerId);

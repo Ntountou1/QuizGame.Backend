@@ -20,6 +20,18 @@ namespace QuizGame.Api.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Retrieves all quiz questions from the system.
+        /// </summary>
+        /// <returns>
+        /// - <c>200 OK</c> with a collection of <see cref="QuestionResponse"/> objects.
+        /// - <c>500 Internal Server Error</c> if an unexpected error occurs while fetching the questions.
+        /// </returns>
+        /// <remarks>
+        /// - Calls <see cref="_questionService.GetAllQuestions"/> to retrieve all questions.
+        /// - Requires the user to be authenticated via [Authorize].
+        /// - Useful for displaying questions in an admin panel or quiz interface.
+        /// </remarks>
         [Authorize]
         [HttpGet]
         public IActionResult GetAllQuestions()

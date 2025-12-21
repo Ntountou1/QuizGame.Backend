@@ -26,7 +26,21 @@ namespace QuizGame.Application.Services
             _tokenService = tokenService;
         }
 
-        //Logs in player
+        /// <summary>
+        /// Authenticates a player using username and password credentials.
+        /// </summary>
+        /// <param name="request">
+        /// The login request containing the player's credentials.
+        /// </param>
+        /// <returns>
+        /// A <see cref="LoginResponse"/> containing authentication data if the credentials
+        /// are valid; otherwise, <c>null</c>.
+        /// </returns>
+        /// <remarks>
+        /// - Validates credentials against the player repository.
+        /// - Updates the player's last login timestamp on successful authentication.
+        /// - Generates and returns an authentication token.
+        /// </remarks>
         public LoginResponse? Login(LoginRequest request)
         {
             var player = _repository.GetAllPlayers()
@@ -52,7 +66,16 @@ namespace QuizGame.Application.Services
             };
         }
 
-        //Return list of all players
+        /// <summary>
+        /// Retrieves all registered players.
+        /// </summary>
+        /// <returns>
+        /// An enumerable collection of <see cref="PlayerResponse"/> objects
+        /// representing all players in the system.
+        /// </returns>
+        /// <remarks>
+        /// This is a read-only operation intended for administrative or listing purposes.
+        /// </remarks>
         public IEnumerable<PlayerResponse> GetPlayers()
         {
             _logger.LogInformation("Fetching all players from repository");
@@ -75,7 +98,19 @@ namespace QuizGame.Application.Services
             return response;
         }
 
-        //Create new player
+        /// <summary>
+        /// Creates a new player account.
+        /// </summary>
+        /// <param name="request">
+        /// The request containing the new player's registration data.
+        /// </param>
+        /// <returns>
+        /// A <see cref="PlayerResponse"/> representing the newly created player.
+        /// </returns>
+        /// <remarks>
+        /// - Initializes player statistics with default values.
+        /// - Persists the new player to the repository.
+        /// </remarks>
         public PlayerResponse CreatePlayer(CreatePlayerRequest request)
         {
             _logger.LogInformation("Creating new player {Username} ", request.Username);
@@ -108,7 +143,23 @@ namespace QuizGame.Application.Services
             };
         }
 
-        //Updates password of logged in user given the old password and the new password on the body
+        /// <summary>
+        /// Updates the password of an existing player.
+        /// </summary>
+        /// <param name="userId">
+        /// The unique identifier of the player whose password is being updated.
+        /// </param>
+        /// <param name="request">
+        /// The request containing the old and new passwords.
+        /// </param>
+        /// <returns>
+        /// An <see cref="UpdatePasswordResponse"/> if the update succeeds; otherwise, <c>null</c>.
+        /// </returns>
+        /// <remarks>
+        /// - Validates the player's existence.
+        /// - Ensures the provided old password matches the current password.
+        /// - Persists the updated password upon successful validation.
+        /// </remarks>
         public UpdatePasswordResponse? UpdatePassword(int userId, UpdatePasswordRequest request)
         {
             var player = _repository.GetAllPlayers().FirstOrDefault(p => p.Id == userId);
@@ -133,7 +184,18 @@ namespace QuizGame.Application.Services
         }
 
 
-        //Automatically update LastLogInAt prop on json when user successfully logs in
+        /// <summary>
+        /// Updates the last login timestamp of a player.
+        /// </summary>
+        /// <param name="playerId">
+        /// The unique identifier of the player.
+        /// </param>
+        /// <remarks>
+        /// This method is typically invoked after a successful login.
+        /// </remarks>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified player does not exist.
+        /// </exception>
         public void UpdateLastLogin (int playerId)
         {
             var player = _repository.GetAllPlayers().FirstOrDefault(p => p.Id == playerId);
@@ -150,6 +212,18 @@ namespace QuizGame.Application.Services
             _logger.LogInformation("Updated LastLogInAt for player {Username}", player.Username);
         }
 
+        /// <summary>
+        /// Deletes a player from the system.
+        /// </summary>
+        /// <param name="playerId">
+        /// The unique identifier of the player to delete.
+        /// </param>
+        /// <remarks>
+        /// Permanently removes the player and all associated data from the repository.
+        /// </remarks>
+        /// <exception cref="Exception">
+        /// Thrown when the specified player does not exist.
+        /// </exception>
         public void DeletePlayer (int playerId)
         {
             _logger.LogInformation("Attempting to delete player {PlayerId}", playerId);

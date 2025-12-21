@@ -19,6 +19,17 @@ namespace QuizGame.Infrastructure.Repositories
             _filePath = @"C:\Users\Panagiotis\Desktop\QuizGame\players.json";
         }
 
+        /// <summary>
+        /// Retrieves all players from the storage file.
+        /// </summary>
+        /// <returns>
+        /// An enumerable collection of <see cref="Player"/> objects.
+        /// Returns an empty collection if the file does not exist or no players are stored.
+        /// </returns>
+        /// <remarks>
+        /// - Reads the JSON file at <c>_filePath</c> and deserializes it.
+        /// - Does not modify any data.
+        /// </remarks>
         public IEnumerable<Player> GetAllPlayers() {
             if (!File.Exists(_filePath)) 
                 return Enumerable.Empty<Player>();
@@ -29,7 +40,17 @@ namespace QuizGame.Infrastructure.Repositories
             return players ?? Enumerable.Empty<Player>();
         }
 
-       public void AddPlayer(Player newPlayer)
+        /// <summary>
+        /// Adds a new player to the storage file.
+        /// </summary>
+        /// <param name="newPlayer">The <see cref="Player"/> object to add.</param>
+        /// <remarks>
+        /// - Assigns a new unique ID to the player.
+        /// - Reads the existing JSON file and appends the new player.
+        /// - If the file does not exist, creates a new collection.
+        /// - Persists the updated list of players to the JSON file.
+        /// </remarks>
+        public void AddPlayer(Player newPlayer)
         {
             List<Player> players;
 
@@ -52,6 +73,15 @@ namespace QuizGame.Infrastructure.Repositories
             File.WriteAllText(_filePath, updatedJson); 
         }
 
+        /// <summary>
+        /// Updates an existing player's information in the storage file.
+        /// </summary>
+        /// <param name="updatedPlayer">The <see cref="Player"/> object containing updated data.</param>
+        /// <remarks>
+        /// - Finds the player by ID and replaces the existing record.
+        /// - If the player is not found, the file remains unchanged.
+        /// - Persists the updated list of players to the JSON file.
+        /// </remarks>
         public void UpdatePlayer(Player updatedPlayer)
         {
             List<Player> players;
@@ -74,6 +104,15 @@ namespace QuizGame.Infrastructure.Repositories
             }
         }
 
+        /// <summary>
+        /// Deletes a player from the storage file by their ID.
+        /// </summary>
+        /// <param name="id">The unique identifier of the player to delete.</param>
+        /// <remarks>
+        /// - Reads the current player list from the JSON file.
+        /// - Removes the player if found; otherwise, does nothing.
+        /// - Persists the updated list back to the file.
+        /// </remarks>
         public void DeletePlayer(int id)
         {
             List<Player> players;
@@ -103,6 +142,17 @@ namespace QuizGame.Infrastructure.Repositories
             }
         }
 
+        /// <summary>
+        /// Retrieves a single player by their unique ID.
+        /// </summary>
+        /// <param name="id">The unique identifier of the player.</param>
+        /// <returns>
+        /// The <see cref="Player"/> object if found; otherwise, <c>null</c>.
+        /// </returns>
+        /// <remarks>
+        /// - Reads the JSON file at <c>_filePath</c> and searches for the player.
+        /// - Does not modify any data.
+        /// </remarks>
         public Player? GetPlayerById(int id)
         {
             if (!File.Exists(_filePath))

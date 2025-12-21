@@ -18,6 +18,20 @@ namespace QuizGame.Api.Controllers
             _gameService = gameService;
         }
 
+        /// <summary>
+        /// Starts a new quiz game session for the currently authenticated player.
+        /// </summary>
+        /// <returns>
+        /// - <c>200 OK</c> with session details if a new game is successfully started.
+        /// - <c>400 Bad Request</c> if the game cannot be started (e.g., insufficient questions).
+        /// - <c>401 Unauthorized</c> if the user is not authenticated.
+        /// - <c>500 Internal Server Error</c> for unexpected errors.
+        /// </returns>
+        /// <remarks>
+        /// - Extracts the player's ID from the authentication claims.
+        /// - Calls <see cref="_gameService.StartNewGame"/> to create a new session.
+        /// - Requires the user to be authenticated via [Authorize].
+        /// </remarks>
         [Authorize]
         [HttpPost("start")]
         public IActionResult StartGame()
@@ -46,6 +60,19 @@ namespace QuizGame.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves the details of a specific game session by its ID.
+        /// </summary>
+        /// <param name="gameSessionId">The unique identifier of the game session.</param>
+        /// <returns>
+        /// - <c>200 OK</c> with the session data if found.
+        /// - <c>404 Not Found</c> if the session does not exist.
+        /// - <c>500 Internal Server Error</c> for unexpected errors.
+        /// </returns>
+        /// <remarks>
+        /// - Calls <see cref="_gameService.GetGameSession"/> to fetch session information.
+        /// - Requires the user to be authenticated via [Authorize].
+        /// </remarks>
         [Authorize]
         [HttpGet("{gameSessionId}")]
         public IActionResult GetGameSession(int gameSessionId)
@@ -65,7 +92,20 @@ namespace QuizGame.Api.Controllers
             }
         }
 
-
+        /// <summary>
+        /// Submits an answer for a question in an active game session.
+        /// </summary>
+        /// <param name="request">The <see cref="SubmitAnswerRequest"/> containing the session ID, question ID, and answer ID.</param>
+        /// <returns>
+        /// - <c>200 OK</c> with the result of the submitted answer and updated session state.
+        /// - <c>400 Bad Request</c> if the submission is invalid (e.g., question already answered, session not active).
+        /// - <c>404 Not Found</c> if the session or question does not exist.
+        /// - <c>500 Internal Server Error</c> for unexpected errors.
+        /// </returns>
+        /// <remarks>
+        /// - Calls <see cref="_gameService.SubmitAnswer"/> to evaluate and process the answer.
+        /// - Requires the user to be authenticated via [Authorize].
+        /// </remarks>
         [Authorize]
         [HttpPost("submitAnswer")]
         public IActionResult SubmitAnswer([FromBody] SubmitAnswerRequest request)
