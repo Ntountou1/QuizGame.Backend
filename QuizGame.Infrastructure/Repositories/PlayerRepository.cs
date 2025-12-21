@@ -168,6 +168,12 @@ namespace QuizGame.Infrastructure.Repositories
             return players.FirstOrDefault(p => p.Id == id);
         }
 
+        /// <summary>
+        /// Determines the appropriate player level based on the given total score.
+        /// </summary>
+        /// <param name="totalScore">The total score of the player.</param>
+        /// <returns>The highest level number for which the player's total score meets or exceeds the required points.</returns>
+        /// <exception cref="FileNotFoundException">Thrown when the levels.json file cannot be found at the specified path.</exception>
         public int GetLevelForScore(int totalScore)
         {
             if (!File.Exists(_levelsPath))
