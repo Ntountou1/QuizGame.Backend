@@ -14,5 +14,6 @@ namespace QuizGame.Domain.Interfaces
         void UpdatePlayer(Player updatedPlayer);
         void DeletePlayer(int playerId);
         Player? GetPlayerById(int id);
+        int GetLevelForScore(int totalScore);
     }
 }

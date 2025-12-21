@@ -1,22 +1,26 @@
 ﻿using QuizGame.Domain.Entities;
+using QuizGame.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
-using System.Threading.Tasks;
 using System.Text.Json;
-using QuizGame.Domain.Interfaces;
+using System.Threading.Tasks;
 
 namespace QuizGame.Infrastructure.Repositories
 {
     public class PlayerRepository : IPlayerRepository
     {
         private readonly string _filePath;
+        private readonly string _levelsPath;
 
         public PlayerRepository()
         {
             // Points to the Data folder inside output directory
             _filePath = @"C:\Users\Panagiotis\Desktop\QuizGame\players.json";
+
+            _levelsPath = @"C:\Users\Panagiotis\Desktop\QuizGame\levels.json";
         }
 
         /// <summary>
@@ -162,6 +166,22 @@ namespace QuizGame.Infrastructure.Repositories
             var players = JsonSerializer.Deserialize<List<Player>>(json) ?? new List<Player>();
 
             return players.FirstOrDefault(p => p.Id == id);
+        }
+
+        public int GetLevelForScore(int totalScore)
+        {
+            if (!File.Exists(_levelsPath))
+                throw new FileNotFoundException("Levels file not found.", _levelsPath);
+
+
+            // Read and deserialize levels.json
+            var json = File.ReadAllText(_levelsPath);
+            var levels = JsonSerializer.Deserialize<List<Level>>(json) ?? new List<Level>();
+
+            // Find the highest level that fits the totalScore
+            return levels
+                .Where(l => l.PointsRequired <= totalScore)
+                .Max(l => l.LevelNumber);
         }
 
     }

@@ -328,6 +328,8 @@ namespace QuizGame.Application.Services
             player.TotalScore += score;
             player.GamesPlayed += 1;
 
+            //See current level of the Player by the repository layer
+            player.Level = _playerRepository.GetLevelForScore(player.TotalScore);
             _playerRepository.UpdatePlayer(player);
         }
     }
