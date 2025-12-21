@@ -17,14 +17,16 @@ namespace QuizGame.Application.Services
     {
         private readonly ILogger<GameService> _logger;
         private readonly IQuestionRepository _questionRepository;
+        private readonly IPlayerRepository _playerRepository;
 
         // Temporary in-memory storage for sessions
         private static readonly List<GameSession> _sessions = new();
 
-        public GameService(IQuestionRepository questionRepository, ILogger<GameService> logger)
+        public GameService(IQuestionRepository questionRepository, ILogger<GameService> logger, IPlayerRepository playerRepository)
         {
             _questionRepository = questionRepository;
             _logger = logger;
+            _playerRepository = playerRepository;
         }
 
         public StartGameResponse StartNewGame (int playerId)
@@ -157,6 +159,23 @@ namespace QuizGame.Application.Services
             {
                 session.Status = GameSessionStatus.Completed;
                 session.EndTime = DateTime.UtcNow;
+
+                //
+                var player = _playerRepository.GetPlayerById(session.PlayerId);
+                if (player == null)
+                    throw new KeyNotFoundException("Player not found");
+
+                player.TotalScore += session.Score;
+                player.GamesPlayed += 1;
+
+                _playerRepository.UpdatePlayer(player);
+
+                _logger.LogInformation(
+                    "Player {PlayerId} finished game {SessionId} with score {Score}",
+                    player.Id,
+                    session.Id,
+                    session.Score
+                );
             }
 
             return new SubmitAnswerResponse
