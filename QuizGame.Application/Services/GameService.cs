@@ -307,6 +307,28 @@ namespace QuizGame.Application.Services
         }
 
         /// <summary>
+        /// Recalculates and updates the CurrentRank of all players based on their TotalScore.
+        /// The player with the highest TotalScore receives rank 1, the next highest rank 2, and so on.
+        /// </summary>
+        /// <remarks>
+        /// This method should be called after any update to a player's TotalScore to ensure ranks are up to date.
+        /// It loads all players from the PlayerRepository, sorts them in descending order of TotalScore,
+        /// assigns ranks sequentially, and updates each player back to the repository.
+        /// </remarks>
+        private void UpdatePlayerRanks()
+        {
+            var players = _playerRepository.GetAllPlayers().ToList();
+            var sortedPlayers = players.OrderByDescending(p => p.TotalScore).ToList();
+
+            int rank = 1;
+            foreach (var player in sortedPlayers)
+            {
+                player.CurrentRank = rank++;
+                _playerRepository.UpdatePlayer(player);
+            }
+        }
+
+        /// <summary>
         /// Updates aggregate player statistics after a completed game session.
         /// </summary>
         /// <param name="playerId">The unique identifier of the player.</param>
@@ -331,6 +353,9 @@ namespace QuizGame.Application.Services
             //See current level of the Player by the repository layer
             player.Level = _playerRepository.GetLevelForScore(player.TotalScore);
             _playerRepository.UpdatePlayer(player);
+
+            // Update ranks for all players
+            UpdatePlayerRanks();
         }
     }
 }
