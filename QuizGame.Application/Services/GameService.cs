@@ -115,67 +115,22 @@ namespace QuizGame.Application.Services
             return dto;
         }
 
-        public SubmitAnswerResponse SubmitAnswer (SubmitAnswerRequest request)
+        public SubmitAnswerResponse SubmitAnswer(SubmitAnswerRequest request)
         {
-            //Only continue if session exists
-            var session = _sessions.FirstOrDefault(s => s.Id == request.GameSessionId);
-            if (session == null)
-                throw new KeyNotFoundException("Game session not found");
+            var session = GetActiveSession(request.GameSessionId);
+            var question = GetUnansweredQuestion(session, request.QuestionId);
 
-            //Only continue if session is on status InProgress
-            if (session.Status != GameSessionStatus.InProgress)
-                throw new InvalidOperationException("Game session is not active");
-
-            //Only continue if question of specific session exists
-            var question = session.QuestionIds.FirstOrDefault(q => q.QuestionId == request.QuestionId);
-            if (question == null)
-                throw new KeyNotFoundException("Question not found in this session");
-
-            // Allow only one answer per question
-            if (question.TimeTaken.HasValue)
-                throw new InvalidOperationException("This question has already been answered");
-
-            //Take the actual question data to see the correct answer of the question
-            var questionData = _questionRepository.GetAllQuestions()
-                    .First(q => q.Id == question.QuestionId);
-
-            bool isCorrect = request.AnswerId == questionData.CorrectAnswerId;
-            int points = isCorrect ? questionData.Points : 0;
+            var (isCorrect, points) = EvaluateAnswer(request.QuestionId, request.AnswerId);
 
             session.Score += points;
             question.TimeTaken = DateTime.UtcNow - question.QuestionStartTime;
 
-            _logger.LogInformation(
-                    "Session {SessionId} question times: {Times}",
-                    session.Id,
-                    string.Join(", ", session.QuestionIds.Select(q => $"{q.QuestionId}:{q.TimeTaken?.TotalSeconds ?? 0}"))
-                );
+            bool isCompleted = IsSessionCompleted(session);
 
-            // Check if all questions in this game session have been answered.
-            // A question is considered answered if its TimeTaken property has a value greater than zero.
-            // If every question meets this condition, the game session is complete.
-            bool isCompleted = session.QuestionIds.All(q => q.TimeTaken.HasValue && q.TimeTaken.Value > TimeSpan.Zero);
             if (isCompleted)
             {
-                session.Status = GameSessionStatus.Completed;
-                session.EndTime = DateTime.UtcNow;
-
-                //
-                var player = _playerRepository.GetPlayerById(session.PlayerId);
-                if (player == null)
-                    throw new KeyNotFoundException("Player not found");
-
-                player.TotalScore += session.Score;
-                player.GamesPlayed += 1;
-
-                _playerRepository.UpdatePlayer(player);
-
-                _logger.LogInformation(
-                    "Player {PlayerId} finished game {SessionId} with score {Score}",
-                    player.Id,
-                    session.Id,
-                    session.Score
-                );
+                CompleteSession(session);
+                UpdatePlayerStats(session.PlayerId, session.Score);
             }
 
             return new SubmitAnswerResponse
@@ -185,6 +140,67 @@ namespace QuizGame.Application.Services
                 TotalScore = session.Score,
                 IsGameCompleted = isCompleted
             };
+        }
+
+
+        private GameSession GetActiveSession(int sessionId)
+        {
+            var session = _sessions.FirstOrDefault(s => s.Id == sessionId);
+            if (session == null)
+                throw new KeyNotFoundException("Game session not found");
+
+            if (session.Status != GameSessionStatus.InProgress)
+                throw new InvalidOperationException("Game session is not active");
+
+            return session;
+        }
+
+        private GameQuestion GetUnansweredQuestion(GameSession session, int questionId)
+        {
+            var question = session.QuestionIds.FirstOrDefault(q => q.QuestionId == questionId);
+            if (question == null)
+                throw new KeyNotFoundException("Question not found in this session");
+
+            if (question.TimeTaken.HasValue)
+                throw new InvalidOperationException("This question has already been answered");
+
+            return question;
+        }
+
+        private (bool isCorrect, int points) EvaluateAnswer(int questionId, int answerId)
+        {
+            var questionData = _questionRepository
+                .GetAllQuestions()
+                .First(q => q.Id == questionId);
+
+            bool isCorrect = answerId == questionData.CorrectAnswerId;
+            int points = isCorrect ? questionData.Points : 0;
+
+            return (isCorrect, points);
+        }
+
+        private bool IsSessionCompleted(GameSession session)
+        {
+            return session.QuestionIds.All(q =>
+                q.TimeTaken.HasValue && q.TimeTaken.Value > TimeSpan.Zero);
+        }
+
+        private void CompleteSession(GameSession session)
+        {
+            session.Status = GameSessionStatus.Completed;
+            session.EndTime = DateTime.UtcNow;
+        }
+
+        private void UpdatePlayerStats(int playerId, int score)
+        {
+            var player = _playerRepository.GetPlayerById(playerId);
+            if (player == null)
+                throw new KeyNotFoundException("Player not found");
+
+            player.TotalScore += score;
+            player.GamesPlayed += 1;
+
+            _playerRepository.UpdatePlayer(player);
         }
     }
 }
