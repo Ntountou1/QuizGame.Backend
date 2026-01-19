@@ -58,7 +58,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey)),
             ValidateIssuer = false,
-            ValidateAudience = false
+            ValidateAudience = false,
+            ValidateLifetime = true, //Validates the actual minutes of the JWT token
+            ClockSkew = TimeSpan.Zero //Remove default that leaves the JWT token for 5 more minutes
         };
     });
 
