@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using QuizGame.Application.Services;
 using QuizGame.Application.DTOs;
+using QuizGame.Application.Services;
+using QuizGame.Infrastructure.Repositories;
 
 namespace QuizGame.Api.Controllers
 {
@@ -9,10 +10,12 @@ namespace QuizGame.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly PlayerService _playerService;
+        private readonly RefreshTokenService _refreshTokenService;
 
-        public AuthController(PlayerService playerService)
+        public AuthController(PlayerService playerService, RefreshTokenService refreshTokenService)
         {
             _playerService = playerService;
+            _refreshTokenService = refreshTokenService;
         }
 
         /// <summary>
@@ -54,6 +57,34 @@ namespace QuizGame.Api.Controllers
             {
                 return StatusCode(500, new { message = "An unexpected error occurred." });
             }
+        }
+
+        [HttpPost("refresh-token")]
+        public IActionResult RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.RefreshToken))
+                return BadRequest(new { message = "Refresh token is required" });
+
+            // Validate the refresh token
+            var refreshToken = _refreshTokenService.ValidateRefreshToken(request.RefreshToken);
+            if (refreshToken == null)
+                return Unauthorized(new { message = "Invalid or expired refresh token" });
+
+            // Get player from repository
+            var player = _playerService.GetPlayerById(refreshToken.PlayerId);
+            if (player == null)
+                return Unauthorized();
+
+            // Generate new JWT
+            var newToken = _playerService.GenerateJwtToken(player);
+
+            return Ok(new
+            {
+                Token = newToken,
+                RefreshToken = refreshToken.Token, // for now, we keep the same token
+                Username = player.Username,
+                UserId = player.Id
+            });
         }
     }
 }

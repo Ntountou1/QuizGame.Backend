@@ -18,12 +18,14 @@ namespace QuizGame.Application.Services
         private readonly ILogger _logger;
         private readonly IPlayerRepository _repository;
         private readonly TokenService _tokenService;
+        private readonly RefreshTokenService _refreshTokenService;
 
-        public PlayerService(IPlayerRepository repository, ILogger<PlayerService> logger, TokenService tokenService)
+        public PlayerService(IPlayerRepository repository, ILogger<PlayerService> logger, TokenService tokenService, RefreshTokenService refreshTokenService)
         {
             _repository = repository;
             _logger = logger;
             _tokenService = tokenService;
+            _refreshTokenService = refreshTokenService;
         }
 
         /// <summary>
@@ -58,9 +60,13 @@ namespace QuizGame.Application.Services
             UpdateLastLogin(player.Id);
 
             var token = _tokenService.GenerateToken(player);
+
+            var refreshToken = _refreshTokenService.GenerateRefreshToken(player.Id);
+
             return new LoginResponse
             {
                 Token = token,
+                RefreshToken = refreshToken.Token,
                 Username = player.Username!,
                 UserId = player.Id
             };
@@ -238,5 +244,16 @@ namespace QuizGame.Application.Services
 
             _logger.LogInformation("Player {PlayerId} deleted successfully", playerId);
         }
+
+        public Player? GetPlayerById(int playerId)
+        {
+            return _repository.GetAllPlayers().FirstOrDefault(p => p.Id == playerId);
+        }
+
+        public string GenerateJwtToken(Player player)
+        {
+            return _tokenService.GenerateToken(player);
+        }
     }
+
 }

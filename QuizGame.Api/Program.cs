@@ -37,13 +37,17 @@ var secretKey = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperatio
 
 builder.Services.AddSingleton(new TokenService(secretKey));
 
+// Add RefreshTokenService
+builder.Services.AddSingleton<RefreshTokenService>();
+
 // Update PlayerService to inject TokenService
 builder.Services.AddScoped<PlayerService>(provider =>
 {
     var repo = provider.GetRequiredService<PlayerRepository>();
     var tokenService = provider.GetRequiredService<TokenService>();
+    var refreshTokenService = provider.GetRequiredService<RefreshTokenService>();
     var logger = provider.GetRequiredService<ILogger<PlayerService>>();
-    return new PlayerService(repo, logger, tokenService);
+    return new PlayerService(repo, logger, tokenService, refreshTokenService);
 });
 
 // Keep your existing controllers registration

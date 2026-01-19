@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace QuizGame.Application.DTOs
 {
-    public class LoginResponse
+    public class RefreshTokenRequest
     {
-        public string Token { get; set; } = null!;
         public string RefreshToken { get; set; } = null!;
-        public string Username { get; set; } = null!;
-        public int UserId { get; set; }
     }
 }
